@@ -36,6 +36,17 @@ export interface Tag {
   created_at: string;
 }
 
+export interface FaqEntry {
+  id: string;
+  user_id: string;
+  question: string;
+  keywords: string[];
+  answer: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ContactTag {
   id: string;
   contact_id: string;

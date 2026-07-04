@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
-import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
+import { getMediaUrl } from '@/lib/whatsapp/meta-api'
 import { normalizePhone, phonesMatch } from '@/lib/whatsapp/phone-utils'
 import { verifyMetaWebhookSignature } from '@/lib/whatsapp/webhook-signature'
 import { runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
+import { engineSendText } from '@/lib/automations/meta-send'
+import { findMatchingFaqEntry } from '@/lib/faq'
 
 // Lazy-initialized to avoid build-time crash when env vars are missing
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -627,6 +629,23 @@ async function processMessage(
   // Fire-and-forget: a slow or failing automation must not block the
   // webhook's 200 OK response to Meta.
   const inboundText = contentText ?? message.text?.body ?? ''
+  let faqHandled = false
+  if (!flowConsumed && inboundText.trim()) {
+    const faqEntry = await findMatchingFaqEntry(userId, inboundText)
+    if (faqEntry) {
+      try {
+        await engineSendText({
+          userId,
+          conversationId: conversation.id,
+          contactId: contactRecord.id,
+          text: faqEntry.answer,
+        })
+        faqHandled = true
+      } catch (err) {
+        console.error('[faq] auto-reply send failed:', err)
+      }
+    }
+  }
   const automationTriggers: (
     | 'new_contact_created'
     | 'first_inbound_message'
@@ -635,7 +654,7 @@ async function processMessage(
   )[] = []
   // Content-level triggers are suppressed when a flow consumed the
   // message — see the comment block above.
-  if (!flowConsumed) {
+  if (!flowConsumed && !faqHandled) {
     automationTriggers.push('new_message_received', 'keyword_match')
   }
   // new_contact_created fires only when the webhook just auto-created the
