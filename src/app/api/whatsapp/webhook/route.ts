@@ -630,9 +630,22 @@ async function processMessage(
   // webhook's 200 OK response to Meta.
   const inboundText = contentText ?? message.text?.body ?? ''
   let faqHandled = false
+  let fallbackHandled = false
+  console.log('[faq] inbound check:', {
+    userId,
+    conversationId: conversation.id,
+    contactId: contactRecord.id,
+    flowConsumed,
+    inboundText,
+  })
   if (!flowConsumed && inboundText.trim()) {
     const faqEntry = await findMatchingFaqEntry(userId, inboundText)
     if (faqEntry) {
+      console.log('[faq] matched entry:', {
+        faqId: faqEntry.id,
+        question: faqEntry.question,
+        keywords: faqEntry.keywords,
+      })
       try {
         await engineSendText({
           userId,
@@ -641,10 +654,29 @@ async function processMessage(
           text: faqEntry.answer,
         })
         faqHandled = true
+        console.log('[faq] auto-reply sent:', { faqId: faqEntry.id })
       } catch (err) {
         console.error('[faq] auto-reply send failed:', err)
       }
+    } else {
+      console.log('[faq] no matching entry found')
+      try {
+        await engineSendText({
+          userId,
+          conversationId: conversation.id,
+          contactId: contactRecord.id,
+          text: 'Thanks for visiting. Our team will contact you.',
+        })
+        fallbackHandled = true
+        console.log('[faq] fallback reply sent')
+      } catch (err) {
+        console.error('[faq] fallback reply send failed:', err)
+      }
     }
+  } else if (flowConsumed) {
+    console.log('[faq] skipped because flow consumed the message')
+  } else {
+    console.log('[faq] skipped because inbound text is empty')
   }
   const automationTriggers: (
     | 'new_contact_created'
@@ -654,7 +686,7 @@ async function processMessage(
   )[] = []
   // Content-level triggers are suppressed when a flow consumed the
   // message — see the comment block above.
-  if (!flowConsumed && !faqHandled) {
+  if (!flowConsumed && !faqHandled && !fallbackHandled) {
     automationTriggers.push('new_message_received', 'keyword_match')
   }
   // new_contact_created fires only when the webhook just auto-created the
