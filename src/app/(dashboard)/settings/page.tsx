@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Settings, MessageSquare, Tag, User, Palette, Bot } from 'lucide-react';
+import { Settings, MessageSquare, Tag, User, Palette, Bot, Image as ImageIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
 import { TemplateManager } from '@/components/settings/template-manager';
@@ -11,12 +11,14 @@ import { PasswordForm } from '@/components/settings/password-form';
 import { SessionsCard } from '@/components/settings/sessions-card';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
 import { FaqManager } from '@/components/settings/faq-manager';
+import { ImagesManager } from '@/components/settings/images-manager';
 
 const TAB_VALUES = [
   'profile',
   'whatsapp',
   'templates',
   'tags',
+  'images',
   'faq',
   'appearance',
 ] as const;
@@ -84,6 +86,13 @@ export default function SettingsPage() {
             Tags
           </TabsTrigger>
           <TabsTrigger
+            value="images"
+            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
+          >
+            <ImageIcon className="size-4" />
+            Images
+          </TabsTrigger>
+          <TabsTrigger
             value="faq"
             className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
           >
@@ -119,6 +128,10 @@ export default function SettingsPage() {
 
         <TabsContent value="faq">
           <FaqManager />
+        </TabsContent>
+
+        <TabsContent value="images">
+          <ImagesManager />
         </TabsContent>
 
         <TabsContent value="appearance">

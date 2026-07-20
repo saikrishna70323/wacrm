@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Loader2, RefreshCw, Upload } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -101,7 +101,12 @@ export function TemplateManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [uploadingHeaderImage, setUploadingHeaderImage] = useState(false);
+  const [updatingTemplateImageId, setUpdatingTemplateImageId] = useState<string | null>(null);
   const [form, setForm] = useState<TemplateFormData>(emptyForm);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const existingImageInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedTemplateForImage, setSelectedTemplateForImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -255,6 +260,79 @@ export function TemplateManager() {
     }
   }
 
+  async function handleHeaderImageUpload(file: File) {
+    try {
+      setUploadingHeaderImage(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/settings/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || `Upload failed (HTTP ${res.status})`);
+      }
+
+      setForm((current) => ({
+        ...current,
+        header_content: data.asset.public_url,
+      }));
+      toast.success('Header image uploaded');
+    } catch (err) {
+      console.error('Header image upload failed:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploadingHeaderImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  }
+
+  async function handleExistingTemplateImageUpload(templateId: string, file: File) {
+    try {
+      setUpdatingTemplateImageId(templateId);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/settings/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || `Upload failed (HTTP ${res.status})`);
+      }
+
+      const nextUrl = data.asset.public_url as string;
+      const { error } = await supabase
+        .from('message_templates')
+        .update({
+          header_type: 'image',
+          header_content: nextUrl,
+        })
+        .eq('id', templateId);
+
+      if (error) throw error;
+
+      setTemplates((current) =>
+        current.map((template) =>
+          template.id === templateId
+            ? { ...template, header_content: nextUrl }
+            : template,
+        ),
+      );
+      toast.success('Template image updated');
+    } catch (err) {
+      console.error('Existing template image upload failed:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to update template image');
+    } finally {
+      setUpdatingTemplateImageId(null);
+      setSelectedTemplateForImage(null);
+      if (existingImageInputRef.current) existingImageInputRef.current.value = '';
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -265,6 +343,18 @@ export function TemplateManager() {
 
   return (
     <div className="space-y-4 mt-4">
+      <input
+        ref={existingImageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && selectedTemplateForImage) {
+            void handleExistingTemplateImageUpload(selectedTemplateForImage, file);
+          }
+        }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold text-white">Message Templates</h2>
@@ -330,12 +420,48 @@ export function TemplateManager() {
                     )}
                   </div>
                   <p className="text-sm text-slate-400 line-clamp-2">{template.body_text}</p>
-                  {template.header_type && (
-                    <p className="text-xs text-slate-500">
-                      Header: {template.header_type}
-                      {template.header_content ? ` - ${template.header_content}` : ''}
-                    </p>
-                  )}
+                  <div className="space-y-2">
+                    {template.header_type ? (
+                      <p className="text-xs text-slate-500">
+                        Header: {template.header_type}
+                        {template.header_content ? ` - ${template.header_content}` : ''}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-500">
+                        Header: none
+                      </p>
+                    )}
+                      {(template.header_type === 'image' || !template.header_type) &&
+                      template.header_content ? (
+                        <div className="max-w-[120px] overflow-hidden rounded-lg border border-slate-700 bg-slate-950">
+                          <img
+                            src={template.header_content}
+                            alt={`${template.name} header`}
+                            className="h-16 w-full object-cover"
+                          />
+                        </div>
+                      ) : null}
+                      {(template.header_type === 'image' || !template.header_type) ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTemplateForImage(template.id);
+                            existingImageInputRef.current?.click();
+                          }}
+                          disabled={updatingTemplateImageId === template.id}
+                          className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                        >
+                          {updatingTemplateImageId === template.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Upload className="size-3.5" />
+                          )}
+                          {template.header_content ? 'Replace Image' : 'Upload Image'}
+                        </Button>
+                      ) : null}
+                  </div>
                   {template.footer_text && (
                     <p className="text-xs text-slate-500 italic">{template.footer_text}</p>
                   )}
@@ -473,9 +599,49 @@ export function TemplateManager() {
                   onChange={(e) => setForm({ ...form, header_content: e.target.value })}
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                 />
+                {form.header_type === 'image' && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void handleHeaderImageUpload(file);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => imageInputRef.current?.click()}
+                      disabled={uploadingHeaderImage}
+                      className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                    >
+                      {uploadingHeaderImage ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Upload className="size-4" />
+                      )}
+                      {uploadingHeaderImage ? 'Uploading...' : 'Upload Image to S3'}
+                    </Button>
+                    <p className="text-[11px] text-slate-500">
+                      You can also manage uploaded files from Settings - Images.
+                    </p>
+                  </div>
+                )}
                 <p className="text-[11px] text-slate-500">
                   This URL is sent as the template header media link when the template is used.
                 </p>
+                {form.header_type === 'image' && form.header_content ? (
+                  <div className="max-w-[140px] overflow-hidden rounded-lg border border-slate-700 bg-slate-950">
+                    <img
+                      src={form.header_content}
+                      alt="Template header preview"
+                      className="h-20 w-full object-cover"
+                    />
+                  </div>
+                ) : null}
               </div>
             )}
 

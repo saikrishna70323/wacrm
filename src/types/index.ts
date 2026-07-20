@@ -47,6 +47,18 @@ export interface FaqEntry {
   updated_at: string;
 }
 
+export interface MediaAsset {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_type: string;
+  media_kind: 'image';
+  file_size?: number;
+  storage_key: string;
+  public_url: string;
+  created_at: string;
+}
+
 export interface ContactTag {
   id: string;
   contact_id: string;
