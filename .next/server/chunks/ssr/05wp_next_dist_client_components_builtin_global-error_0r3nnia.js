@@ -1,0 +1,3 @@
+module.exports=[11775,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(71433);a.n(d("[project]/wacrm/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},62536,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(71433);a.n(d("[project]/wacrm/node_modules/next/dist/client/components/builtin/global-error.js"))},19912,a=>{"use strict";a.i(11775);var b=a.i(62536);a.n(b)},70925,a=>{a.n(a.i(19912))}];
+
+//# sourceMappingURL=05wp_next_dist_client_components_builtin_global-error_0r3nnia.js.map

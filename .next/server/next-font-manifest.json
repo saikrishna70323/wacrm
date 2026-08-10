@@ -1,0 +1,67 @@
+{
+  "app": {
+    "[project]/wacrm/src/app/(auth)/forgot-password/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(auth)/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(auth)/signup/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/automations/[id]/edit/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/automations/[id]/logs/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/automations/new/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/automations/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/broadcasts/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/broadcasts/new/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/broadcasts/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/contacts/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/dashboard/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/flows/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/flows/[id]/runs/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/flows/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/inbox/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/pipelines/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/(dashboard)/settings/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/_not-found/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ],
+    "[project]/wacrm/src/app/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

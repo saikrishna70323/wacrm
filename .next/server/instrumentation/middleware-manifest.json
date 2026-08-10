@@ -1,0 +1,12 @@
+{
+  "sorted_middleware": [],
+  "middleware": {},
+  "instrumentation": {
+    "files": [
+      "server/edge/chunks/wacrm_11n9myg._.js",
+      "server/edge/chunks/0g8s_next_dist_esm_build_templates_edge-wrapper_0g07hd8.js"
+    ],
+    "name": "instrumentation"
+  },
+  "functions": {}
+}
