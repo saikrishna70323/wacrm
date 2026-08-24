@@ -17,6 +17,9 @@
 
 # production
 /build
+.next/dev/
+.next/cache/
+node_modules/
 
 # misc
 .DS_Store
